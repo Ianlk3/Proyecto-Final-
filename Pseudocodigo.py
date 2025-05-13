@@ -1,80 +1,46 @@
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from math import pi
+import graphviz
 
-sns.set(style="whitegrid", context="notebook")
+def crear_diagrama_gota():
+    dot = graphviz.Digraph()
 
-class GotaEnAceite:
-    def __init__(self, r0, h0, dr_dt, dh_dt, tiempo_max=10, pasos=100):
-        self.r0 = r0
-        self.h0 = h0
-        self.dr_dt = dr_dt
-        self.dh_dt = dh_dt
-        self.t = np.linspace(0, tiempo_max, pasos)
+    # Inicio
+    dot.node("A", "Inicio", shape="oval'")
 
-        self.r = self.r0 + self.dr_dt * self.t
-        self.h = self.h0 + self.dh_dt * self.t
-        self.d = 2 * self.r
-        self.V = pi * self.r**2 * self.h
-        self.dV_dt = pi * (2 * self.r * self.h * self.dr_dt + self.r**2 * self.dh_dt)
+    # Entrada de parámetros iniciales
+    dot.node('B', 'Leer r0, h0, dr/dt, dh/dt, tiempo_max, pasos', shape='parallelogram')
 
-        self.df = pd.DataFrame({
-            'Tiempo (s)': self.t,
-            'Radio (mm)': self.r,
-            'Altura (mm)': self.h,
-            'Diametro (mm)': self.d,
-            'Volumen (mm³)': self.V,
-            'dV/dt (mm³/s)': self.dV_dt
-        })
+    # Cálculo de tiempo y variables
+    dot.node("C", 'Calcular t = linspace(0, tiempo_max, pasos)', shape='rectangle')
+    dot.node("D", 'Calcular r(t), h(t)', shape='rectangle')
+    dot.node('E', 'Calcular d = 2 * r, V = πr²h', shape='rectangle')
+    dot.node('F', 'Calcular dV/dt = π(2rh dr/dt + r² dh/dt)', shape='rectangle')
+    dot.node('G', 'Crear DataFrame con resultados', shape='rectangle')
 
-    def mostrar_resultados(self):
-        print("\n--- Datos iniciales y finales ---")
-        print(f"Radio inicial: {self.r0} mm")
-        print(f"Altura inicial: {self.h0} mm")
-        print(f"Tasa de cambio del radio: {self.dr_dt} mm/s")
-        print(f"Tasa de cambio de la altura: {self.dh_dt} mm/s")
-        print(self.df.iloc[[0, -1]])
+    # Mostrar resultados y graficar
+    dot.node('H', 'Mostrar resultados iniciales y finales', shape='rectangle')
+    dot.node('I', 'Graficar curvas de d, V, dV/dt', shape='rectangle')
 
-    def graficar(self):
-        fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+    # Decisión para exportar
+    dot.node('J', '¿Exportar CSV?', shape='diamond')
+    dot.node('K', 'Exportar CSV', shape='rectangle')
+    dot.node('L', 'Fin', shape='oval')
 
-        sns.lineplot(data=self.df, x='Tiempo (s)', y='Diametro (mm)', ax=axes[0], color='royalblue')
-        axes[0].set_title("Diámetro vs Tiempo")
+    # Flujo gráfico
+    dot.edge('A', 'B')
+    dot.edge('B', 'C')
+    dot.edge('C', 'D')
+    dot.edge('D', 'E')
+    dot.edge('E', 'F')
+    dot.edge('F', 'G')
+    dot.edge('G', 'H')
+    dot.edge('H', 'I')
+    dot.edge('I', 'J')
+    dot.edge('J', 'K', label='Sí')
+    dot.edge('J', 'L', label='No')
+    dot.edge('K', 'L')
 
-        sns.lineplot(data=self.df, x='Tiempo (s)', y='Volumen (mm³)', ax=axes[1], color='seagreen')
-        axes[1].set_title("Volumen vs Tiempo")
+    return dot
 
-        sns.lineplot(data=self.df, x='Tiempo (s)', y='dV/dt (mm³/s)', ax=axes[2], color='crimson')
-        axes[2].set_title("dV/dt vs Tiempo")
-
-        fig.suptitle("Crecimiento de una gota en aceite con altura variable", fontsize=14)
-        plt.tight_layout(rect=[0, 0, 1, 0.95])
-        plt.show()
-
-    def exportar_csv(self, nombre_archivo="gota_datos.csv"):
-        self.df.to_csv(nombre_archivo, index=False)
-        print(f"\n✅ Datos exportados como '{nombre_archivo}'.")
-
-# ----------------------
-# Simulación sin input()
-# ----------------------
-
-# Puedes ajustar estos valores directamente
-r0 = 2.0        # Radio inicial en mm
-h0 = 5.0        # Altura inicial en mm
-dr_dt = 0.1     # Cambio del radio por segundo
-dh_dt = 0.05    # Cambio de la altura por segundo
-tiempo = 10     # Duración total en segundos
-
-# Crear y ejecutar la simulación
-gota = GotaEnAceite(r0, h0, dr_dt, dh_dt, tiempo_max=tiempo)
-gota.mostrar_resultados()
-gota.graficar()
-
-# Exportar automáticamente si se desea
-exportar = True
-if exportar:
-    nombre = "gota_datos.csv"
-    gota.exportar_csv(nombre)
+crear_diagrama_gota()
+diagrama = crear_diagrama_gota()
+diagrama.render("diagrama_gota", format='png', view=True)
