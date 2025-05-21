@@ -62,22 +62,22 @@ class GotaEnAceite:
         print(f"Datos exportados a '{nombre_archivo}'")
 
 # -------------------------
-# Datos de la simulación
+# Entrada de datos interactiva
 # -------------------------
 
-r0 = 1.0      # Radio inicial en mm
-h0 = 1.0      # Altura inicial en mm
-dr_dt = 0.1   # Tasa de cambio de radio en mm/s
-dh_dt = 0.1   # Tasa de cambio de altura en mm/s
-tiempo = 10   # Tiempo total de simulación en segundos
+print("=== Simulación de una gota en aceite ===")
+
+try:
+    r0 = float(input("Radio inicial (mm): "))
+    h0 = float(input("Altura inicial (mm): "))
+    dr_dt = float(input("Tasa de cambio del radio (mm/s): "))
+    dh_dt = float(input("Tasa de cambio de la altura (mm/s): "))
+    tiempo = float(input("Tiempo total de simulación (s): "))
+except ValueError:
+    print("❌ Error: por favor ingresa valores numéricos.")
+    exit()
 
 # Crear y ejecutar la simulación
 gota = GotaEnAceite(r0, h0, dr_dt, dh_dt, tiempo_max=tiempo)
 gota.mostrar_resultados()
 gota.graficar()
-
-# Exportar CSV si se desea
-exportar = True
-if exportar:
-    nombre = "gota_datos.csv"
-    gota.exportar_datos(nombre)
